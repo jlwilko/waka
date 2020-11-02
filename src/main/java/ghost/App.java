@@ -33,6 +33,8 @@ public class App extends PApplet {
     }
 
     public void draw() { 
+
+        this.game.tick(this);
         background(0, 0, 0);
 
         this.game.draw(this);
@@ -42,6 +44,7 @@ public class App extends PApplet {
         // this.ghost.draw(this);
 
         // subdivide into draw methods and tick emthods
+
     }
 
     public static void main(String[] args) {

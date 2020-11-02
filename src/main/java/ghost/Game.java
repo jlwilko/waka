@@ -119,6 +119,15 @@ public class Game {
         // draw Waka
     }
 
+    public void tick(PApplet app){
+        // this.board.draw(app);
+        // for (Ghost g : this.ghosts){
+            // g.tick(app);
+        // }
+        this.player.tick(app);
+
+    }
+
     private List<Long> getArrayFromJSON(Object array){
         ArrayList<Long> ls = new ArrayList<Long>();
         JSONArray jsonArray = (JSONArray)array;
