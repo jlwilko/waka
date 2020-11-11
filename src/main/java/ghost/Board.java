@@ -3,7 +3,6 @@ package ghost;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -11,16 +10,14 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 public class Board{
-    // TODO decide what this should be
     private Tile[][] board;
-
-    private List<Ghost> ghosts;
-    private Player player;
+    private Game game;
 
     private Map<String,PImage> tileSprites;
 
-    public Board(String filename, PApplet app){
+    public Board(String filename, Game game, PApplet app){
         this.board = new Tile[36][28]; 
+        this.game = game;
 
         createSpriteHashMap(app);
 
@@ -36,7 +33,8 @@ public class Board{
                 for (String string : line) {
 
                     PImage sprite = tileSprites.get(string);
-                    this.board[row][column] = new Tile(sprite, column, row);
+                    int id = sprite != null ? Integer.parseInt(string) : 0;
+                    this.board[row][column] = new Tile(sprite, column, row, id);
 
                     column++;
                 }
@@ -80,4 +78,18 @@ public class Board{
         }
     }
 
+    public void tick(PApplet app){
+        int x = game.getPlayerX();
+        int y = game.getPlayerY();
+        int subX = game.getPlayerSubX();
+        int subY = game.getPlayerSubY();
+
+        if ((subX == 0 && subY == 0) && checkBoardTile(x, y)){
+            board[y][x] = new Tile(tileSprites.get("0"), x, y, 0);
+        }
+    }
+
+    public boolean checkBoardTile(int Xcoord, int Ycoord){
+        return (this.board[Ycoord][Xcoord].getID() == 0 || this.board[Ycoord][Xcoord].getID() == 7);
+    }
 }
