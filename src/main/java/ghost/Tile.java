@@ -10,11 +10,17 @@ public class Tile{
     private PImage sprite;
     private int x;
     private int y;
+    private int id;
 
-    public Tile(PImage sprite, int x, int y){
+    public Tile(PImage sprite, int x, int y, int id){
         this.sprite = sprite;
         this.x = x;
         this.y = y;
+        this.id = id;
+    }
+
+    public int getID(){
+        return this.id;
     }
 
     public void draw(PApplet app){

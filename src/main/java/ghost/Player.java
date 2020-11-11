@@ -3,67 +3,60 @@ package ghost;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-public class Player {
-
-    private int tileX;
-    private int tileY;
-    private int xOffset;
-    private int yOffset;
-    private int dx;
-    private int dy;
-
-    private PImage sprite;
+public class Player extends Entity{
 
 
-    public Player(int x, int y, PImage sprite){
-        this.tileX = x;
-        this.tileY = y;
-        this.sprite = sprite;
-        this.xOffset = -4;
-        this.yOffset = -4;
-        this.dx = 0;
-        this.dy = 0;
+    public Player(int x, int y, PImage sprite, long speed, Game game){
+        super(x, y, sprite, speed, game);
+
+        // // Large tile position
+        // this.x = x;
+        // this.y = y;
+        // this.sprite = sprite;
+
+        // // No issues with overflow from this since speed will either be 1 or 2
+        // this.speed = (int) speed;
+
+        // // Position within each tile
+        // this.subX = 0;
+        // this.subY = 0;
+
+        // // Player should initially be going left
+        // this.movement = Direction.LEFT;
+        // this.nextMovement = Direction.LEFT;
+
+        // // Offset for the left facing sprite
+        // this.xOff = -4;
+        // this.yOff = -5;
+
+        // this.game = game;
+    }
+
+    public int getTileX(){
+        return x;
+    }
+
+    public int getTileY(){
+        return y;
+    }
+
+    public Direction getMovementDirection(){
+        return this.movement;
     }
 
 
-    public void draw(PApplet app){
-        // draw the sprite for the class 
-        // Handling graphcis 
-        // Should generally be a single line, or couple of lines,
-        // minimial logic
-
-        app.image(this.sprite, tileX*16+xOffset, tileY*16+yOffset);
-
-    }
-
-    public void tick(PApplet app){
-        
-        
+    public void setNextMovement(App app){
         if (app.keyPressed){
-            if (app.key == 'w' || app.key == app.CODED && app.keyCode == app.UP){
-                this.dy = 1;
-                this.dx = 0;
-            } else if (app.key == 'a' || app.key == app.CODED && app.keyCode == app.LEFT){
-                this.dy = 0;
-                this.dx = -1;
-            } else if (app.key == 's' || app.key == app.CODED && app.keyCode == app.DOWN){
-                this.dy = -1;
-                this.dx = 0;
-            } else if (app.key == 'd' || app.key == app.CODED && app.keyCode == app.RIGHT){
-                this.dy = 0;
-                this.dx = 1;
+            if (app.key == 'w' || app.key == PApplet.CODED && app.keyCode == PApplet.UP){
+                this.nextMovement = Direction.UP;
+            } else if (app.key == 'a' || app.key == PApplet.CODED && app.keyCode == PApplet.LEFT){
+                this.nextMovement = Direction.LEFT;
+            } else if (app.key == 's' || app.key == PApplet.CODED && app.keyCode == PApplet.DOWN){
+                this.nextMovement = Direction.DOWN;
+            } else if (app.key == 'd' || app.key == PApplet.CODED && app.keyCode == PApplet.RIGHT){
+                this.nextMovement = Direction.RIGHT;
             }
         }
-        
-        this.xOffset += this.dx;
-        int temp = this.xOffset/16;
-        this.tileX += temp;
-        this.xOffset %= 16;
-        
-        this.yOffset -= this.dy;
-        temp = this.yOffset/16;
-        this.tileY += temp;
-        this.yOffset %= 16;
     }
     
 }
