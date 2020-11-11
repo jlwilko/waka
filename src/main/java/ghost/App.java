@@ -9,7 +9,7 @@ public class App extends PApplet {
     public static final String CONFIG_FILENAME = "config.json";
     
     // private Ghost ghost;
-    private Game game;
+    public Game game;
     // private Map map;
 
     public App() {
