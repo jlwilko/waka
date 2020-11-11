@@ -47,7 +47,7 @@ public class Game {
 
     public void setup(PApplet app){
         
-        this.board = new Board(mapfile, app);
+        this.board = new Board(mapfile, this, app);
         this.ghosts = findGhosts(mapfile, app);
         this.player = findPlayer(mapfile,app);
 
@@ -67,7 +67,8 @@ public class Game {
                 for (String string : line) {
                     if (string.equals("g")){
                         ghosts.add(new Ghost(column,row,
-                         app.loadImage("src/main/resources/ghost.png")));
+                                   app.loadImage("src/main/resources/ghost.png"), 
+                                   this.speed, this));
                     }
                     column++;
                 }
@@ -92,8 +93,9 @@ public class Game {
 
                 for (String string : line) {
                     if (string.equals("p")){
+                        sc.close();
                         return new Player(column,row, 
-                        app.loadImage("src/main/resources/playerClosed.png"));
+                        app.loadImage("src/main/resources/playerClosed.png"), this.speed, this);
                     }
                     column++;
                 }
@@ -102,8 +104,7 @@ public class Game {
             sc.close();
         } catch (FileNotFoundException e){
             System.out.printf("File not found :(\n");
-        }
-        
+        } 
         return null;
 
     }
@@ -119,12 +120,15 @@ public class Game {
         // draw Waka
     }
 
-    public void tick(PApplet app){
-        // this.board.draw(app);
-        // for (Ghost g : this.ghosts){
-            // g.tick(app);
-        // }
+    public void tick(App app){
+        for (Ghost g : this.ghosts){
+            g.setNextMovement(app);
+            g.tick(app);
+        }
+        this.player.setNextMovement(app);
+        // this.board.checkValidMove(this.player);
         this.player.tick(app);
+        this.board.tick(app);
 
     }
 
@@ -137,6 +141,17 @@ public class Game {
             }
         }
         return ls;
+    }
+
+    // private void movePlayer(){
+    //     // function to check in the board if the attempted move is valid
+    //     Direction move = this.player.getMovementDirection();
+        
+    //     // if this.board.checkValidMove(this.player,move)
+    // }
+
+    public boolean checkBoardTile(int Xcoord, int Ycoord){
+        return this.board.checkBoardTile(Xcoord, Ycoord);
     }
 
     private String readFile(String filename){
@@ -153,5 +168,21 @@ public class Game {
             System.out.printf("Error: File not Found");
             return "";
         }
+    }
+
+    public int getPlayerX(){
+        return this.player.x;
+    }
+
+    public int getPlayerY(){
+        return this.player.y;
+    }
+
+    public int getPlayerSubX(){
+        return this.player.subX;
+    }
+
+    public int getPlayerSubY(){
+        return this.player.subY;
     }
 }
