@@ -1,35 +1,19 @@
 package ghost;
 
+import java.util.Map;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 
 public class Player extends Entity{
 
+    private int framesSinceChange;
+    private Map<Direction,PImage> sprites; 
 
-    public Player(int x, int y, PImage sprite, long speed, Game game){
-        super(x, y, sprite, speed, game);
-
-        // // Large tile position
-        // this.x = x;
-        // this.y = y;
-        // this.sprite = sprite;
-
-        // // No issues with overflow from this since speed will either be 1 or 2
-        // this.speed = (int) speed;
-
-        // // Position within each tile
-        // this.subX = 0;
-        // this.subY = 0;
-
-        // // Player should initially be going left
-        // this.movement = Direction.LEFT;
-        // this.nextMovement = Direction.LEFT;
-
-        // // Offset for the left facing sprite
-        // this.xOff = -4;
-        // this.yOff = -5;
-
-        // this.game = game;
+    public Player(int x, int y, Map<Direction,PImage> sprites, long speed, Game game){
+        super(x, y, sprites.get(Direction.LEFT), speed, game);
+        this.sprites = sprites; 
+        this.framesSinceChange = 0;
     }
 
     public int getTileX(){
@@ -40,6 +24,35 @@ public class Player extends Entity{
         return y;
     }
 
+    public boolean tick(App app){
+        boolean res = super.tick(app);
+        this.framesSinceChange++;
+        System.out.printf("frames = %d\n", this.framesSinceChange);
+        
+        if (this.framesSinceChange >= 8){
+            this.changeSprite();
+            this.framesSinceChange = 0;
+        }
+        return res;
+
+    }
+
+    private void changeSprite(){
+        if (this.sprite == this.sprites.get(Direction.NONE)){
+            if (this.movement == Direction.NONE){
+                this.sprite = this.sprites.get(this.lastMovement);
+            } else {
+                this.sprite = this.sprites.get(this.movement);
+            }
+        } else {
+            this.sprite = this.sprites.get(Direction.NONE);
+        }
+    }
+
+    public void restart(){
+        super.restart();
+        this.sprite = this.sprites.get(Direction.LEFT);
+    }
     public Direction getMovementDirection(){
         return this.movement;
     }

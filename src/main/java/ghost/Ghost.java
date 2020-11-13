@@ -8,6 +8,7 @@ public class Ghost extends Entity{
 
     public Ghost(int x, int y, PImage sprite, long speed, Game game){
         super(x, y, sprite, speed, game);
+        this.xOff = -6;
     }
 
 

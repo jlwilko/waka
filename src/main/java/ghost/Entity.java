@@ -12,6 +12,10 @@ public abstract class Entity {
     protected int xOff;
     protected int yOff;
 
+    protected int startX;
+    protected int startY;
+
+    protected Direction lastMovement;
     protected Direction movement;
     protected Direction nextMovement;
 
@@ -27,6 +31,8 @@ public abstract class Entity {
         this.y = y;
         this.sprite = sprite;
 
+        this.startX = x;
+        this.startY = y;
         // No issues with overflow from this since speed will either be 1 or 2
         this.speed = (int) speed;
 
@@ -35,6 +41,7 @@ public abstract class Entity {
         this.subY = 0;
 
         // Player should initially be going left
+        this.lastMovement = Direction.LEFT;
         this.movement = Direction.LEFT;
         this.nextMovement = Direction.LEFT;
 
@@ -61,12 +68,14 @@ public abstract class Entity {
             // check if we are currently trying to move into a wall
             if (!this.canMove(this.movement)){
                 // if so, we stop moving 
+                this.lastMovement = this.movement;
                 this.movement = Direction.NONE;
             } 
             // if the next movement buffered will allow us to move, set 
             // that as the new movement direction
             if (this.canMove(this.nextMovement)) {
                 this.movement = this.nextMovement;
+                
             }
         }
         return this.step(app);
@@ -110,4 +119,12 @@ public abstract class Entity {
         return this.game.checkBoardTile(x + move.xVel, y + move.yVel); 
     }
 
+    public void restart(){
+        this.x = this.startX;
+        this.y = this.startY;
+        this.subX = 0;
+        this.subY = 0;
+        this.movement = Direction.LEFT;
+        this.nextMovement = Direction.LEFT;
+    }
 }

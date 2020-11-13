@@ -3,7 +3,9 @@ package ghost;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.json.simple.JSONArray;
@@ -12,6 +14,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import processing.core.PApplet;
+import processing.core.PImage;
 
 public class Game {
     private Board board;
@@ -19,14 +22,13 @@ public class Game {
     private long lives;
     private String mapfile;
 
-    private int fruitNumber;
-
     private List<Long> modeLengths;
     // private Player player;
     private List<Ghost> ghosts;
     private Player player;
 
     private boolean won;
+    private int framesSinceWon;
     
 
     public Game(String filename, PApplet app){
@@ -49,6 +51,7 @@ public class Game {
         
 
         this.won = false;
+        this.framesSinceWon = 0;
 
     }
 
@@ -101,8 +104,13 @@ public class Game {
                 for (String string : line) {
                     if (string.equals("p")){
                         sc.close();
-                        return new Player(column,row, 
-                        app.loadImage("src/main/resources/playerClosed.png"), this.speed, this);
+                        Map<Direction,PImage> map = new HashMap<Direction,PImage>();
+                        map.put(Direction.DOWN, app.loadImage("src/main/resources/playerDown.png"));
+                        map.put(Direction.UP, app.loadImage("src/main/resources/playerUp.png"));
+                        map.put(Direction.RIGHT, app.loadImage("src/main/resources/playerRight.png"));
+                        map.put(Direction.LEFT, app.loadImage("src/main/resources/playerLeft.png"));
+                        map.put(Direction.NONE, app.loadImage("src/main/resources/playerClosed.png"));
+                        return new Player(column,row, map, this.speed, this);
                     }
                     column++;
                 }
@@ -134,16 +142,30 @@ public class Game {
             g.tick(app);
         }
         this.player.setNextMovement(app);
-        // this.board.checkValidMove(this.player);
         this.player.tick(app);
         this.won = this.board.tick(app);
             
         } else {
             System.out.printf("You won, good work!\n");
+            this.framesSinceWon++;
             
+            if (this.framesSinceWon > 60*1){
+                System.out.printf("restarting game now\n");
+                this.restart();
+            }
         }
 
     }
+
+    public void restart(){
+        for (Ghost g : this.ghosts){
+            g.restart();
+        }
+        player.restart();
+        board.restart(this.mapfile);
+        this.won = false;
+    }
+
 
     private List<Long> getArrayFromJSON(Object array){
         ArrayList<Long> ls = new ArrayList<Long>();

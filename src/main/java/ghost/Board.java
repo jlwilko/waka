@@ -110,4 +110,37 @@ public class Board{
         return (this.board[Ycoord][Xcoord].getID() == 7);
     }
 
+    public void restart(String filename){
+        File file = new File(filename);
+        try{
+            Scanner sc = new Scanner(file);
+            int row = 0;
+            while (sc.hasNext()){
+
+                String[] line = sc.nextLine().split("");
+                int column = 0;
+
+                for (String string : line) {
+
+                    PImage sprite = tileSprites.get(string);
+                    int id = sprite != null ? Integer.parseInt(string) : 0;
+                    this.board[row][column] = new Tile(sprite, column, row, id);
+                    if (id == 7){
+                        fruitNumber++;
+                    }
+
+                    column++;
+                }
+
+                row++;
+
+            }
+
+            sc.close();
+            
+        } catch (FileNotFoundException e){
+            System.out.printf("Map file not found.\n");
+            
+        }
+    }
 }
