@@ -28,6 +28,10 @@ public class Ghost extends Entity{
         int i = 0;
         while (this.movement == arr[i].direction.opposite() || !this.canMove(arr[i].direction)){
             i++;
+            if (i==4){
+                this.nextMovement = this.movement.opposite();
+                return;
+            }
         }
         this.nextMovement = arr[i].direction;
     }

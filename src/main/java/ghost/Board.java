@@ -12,6 +12,7 @@ import processing.core.PImage;
 public class Board{
     private Tile[][] board;
     private Game game;
+    private int fruitNumber;
 
     private Map<String,PImage> tileSprites;
 
@@ -35,6 +36,9 @@ public class Board{
                     PImage sprite = tileSprites.get(string);
                     int id = sprite != null ? Integer.parseInt(string) : 0;
                     this.board[row][column] = new Tile(sprite, column, row, id);
+                    if (id == 7){
+                        fruitNumber++;
+                    }
 
                     column++;
                 }
@@ -78,18 +82,32 @@ public class Board{
         }
     }
 
-    public void tick(PApplet app){
+    public boolean tick(PApplet app){
         int x = game.getPlayerX();
         int y = game.getPlayerY();
         int subX = game.getPlayerSubX();
         int subY = game.getPlayerSubY();
 
-        if ((subX == 0 && subY == 0) && checkBoardTile(x, y)){
+        if ((subX == 0 && subY == 0) && isFruitTile(x, y)){
             board[y][x] = new Tile(tileSprites.get("0"), x, y, 0);
+            this.fruitNumber--;
+            // System.out.printf("Remaining fruit: %d", this.fruitNumber);
+            
         }
+
+        return this.fruitNumber > 0 ? false : true;
+    }
+
+    public int getRemaininigFruit(){
+        return this.fruitNumber;
     }
 
     public boolean checkBoardTile(int Xcoord, int Ycoord){
         return (this.board[Ycoord][Xcoord].getID() == 0 || this.board[Ycoord][Xcoord].getID() == 7);
     }
+    
+    public boolean isFruitTile(int Xcoord, int Ycoord){
+        return (this.board[Ycoord][Xcoord].getID() == 7);
+    }
+
 }

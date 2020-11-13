@@ -19,10 +19,14 @@ public class Game {
     private long lives;
     private String mapfile;
 
+    private int fruitNumber;
+
     private List<Long> modeLengths;
     // private Player player;
     private List<Ghost> ghosts;
     private Player player;
+
+    private boolean won;
     
 
     public Game(String filename, PApplet app){
@@ -42,6 +46,9 @@ public class Game {
         } catch (ParseException e){
             System.out.printf("Invalid JSON file given.\n");
         }
+        
+
+        this.won = false;
 
     }
 
@@ -121,6 +128,7 @@ public class Game {
     }
 
     public void tick(App app){
+        if (!this.won){
         for (Ghost g : this.ghosts){
             g.setNextMovement(app);
             g.tick(app);
@@ -128,7 +136,12 @@ public class Game {
         this.player.setNextMovement(app);
         // this.board.checkValidMove(this.player);
         this.player.tick(app);
-        this.board.tick(app);
+        this.won = this.board.tick(app);
+            
+        } else {
+            System.out.printf("You won, good work!\n");
+            
+        }
 
     }
 
@@ -142,13 +155,6 @@ public class Game {
         }
         return ls;
     }
-
-    // private void movePlayer(){
-    //     // function to check in the board if the attempted move is valid
-    //     Direction move = this.player.getMovementDirection();
-        
-    //     // if this.board.checkValidMove(this.player,move)
-    // }
 
     public boolean checkBoardTile(int Xcoord, int Ycoord){
         return this.board.checkBoardTile(Xcoord, Ycoord);
