@@ -1,5 +1,5 @@
 {
-    "map": "map1.txt",
+    "map": "map.txt",
     "lives": 3,
     "speed": 2,
     "modeLengths": [

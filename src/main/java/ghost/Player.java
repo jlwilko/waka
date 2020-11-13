@@ -27,7 +27,7 @@ public class Player extends Entity{
     public boolean tick(App app){
         boolean res = super.tick(app);
         this.framesSinceChange++;
-        System.out.printf("frames = %d\n", this.framesSinceChange);
+        // System.out.printf("frames = %d\n", this.framesSinceChange);
         
         if (this.framesSinceChange >= 8){
             this.changeSprite();

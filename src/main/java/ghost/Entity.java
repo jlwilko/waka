@@ -75,7 +75,7 @@ public abstract class Entity {
             // that as the new movement direction
             if (this.canMove(this.nextMovement)) {
                 this.movement = this.nextMovement;
-                
+
             }
         }
         return this.step(app);

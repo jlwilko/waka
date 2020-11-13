@@ -14,6 +14,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 import processing.core.PImage;
 
 public class Game {
@@ -29,7 +30,8 @@ public class Game {
 
     private boolean won;
     private int framesSinceWon;
-    
+
+    private PFont font;
 
     public Game(String filename, PApplet app){
         String contents = readFile(filename);
@@ -57,6 +59,7 @@ public class Game {
 
     public void setup(PApplet app){
         
+        this.font = app.createFont("src/main/resources/PressStart2P-Regular.ttf",30);
         this.board = new Board(mapfile, this, app);
         this.ghosts = findGhosts(mapfile, app);
         this.player = findPlayer(mapfile,app);
@@ -125,11 +128,19 @@ public class Game {
     }
 
     public void draw(PApplet app){
+        if (this.won){
+            app.background(0,0,0);
+            app.textFont(this.font,30);                  // STEP 3 Specify font to be used
+            app.fill(255);                         // STEP 4 Specify font color 
+            app.textAlign(PApplet.CENTER);
+            app.text("YOU WIN",app.width/2,app.height/3);   // STEP 5 Display Text 
+        } else {
         this.board.draw(app);
         for (Ghost g : this.ghosts){
             g.draw(app);
         }
         this.player.draw(app);
+        }
 
         // draw all ghosts
         // draw Waka
@@ -146,18 +157,19 @@ public class Game {
         this.won = this.board.tick(app);
             
         } else {
-            System.out.printf("You won, good work!\n");
+            // System.out.printf("You won, good work!\n");
             this.framesSinceWon++;
             
-            if (this.framesSinceWon > 60*1){
-                System.out.printf("restarting game now\n");
+            if (this.framesSinceWon > 60*10){
+                // System.out.printf("restarting game now\n");
                 this.restart();
             }
-        }
+        } 
 
     }
 
     public void restart(){
+        this.framesSinceWon = 0;
         for (Ghost g : this.ghosts){
             g.restart();
         }
