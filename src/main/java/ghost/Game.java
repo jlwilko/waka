@@ -23,7 +23,7 @@ public class Game {
     private long lives;
     private String mapfile;
 
-    private List<Long> modeLengths;
+    public List<Long> modeLengths;
     // private Player player;
     private List<Ghost> ghosts;
     private Player player;
@@ -32,6 +32,8 @@ public class Game {
     private int framesSinceWon;
 
     private PFont font;
+    private PImage playerSprite;
+
 
     public Game(String filename, PApplet app){
         String contents = readFile(filename);
@@ -63,6 +65,7 @@ public class Game {
         this.board = new Board(mapfile, this, app);
         this.ghosts = findGhosts(mapfile, app);
         this.player = findPlayer(mapfile,app);
+        this.playerSprite = app.loadImage("src/main/resources/playerRight.png");
 
     }
 
@@ -81,7 +84,7 @@ public class Game {
                     if (string.equals("g")){
                         ghosts.add(new Ghost(column,row,
                                    app.loadImage("src/main/resources/ghost.png"), 
-                                   this.speed, this));
+                                   this.speed, this, this.modeLengths));
                     }
                     column++;
                 }
@@ -140,6 +143,9 @@ public class Game {
             g.draw(app);
         }
         this.player.draw(app);
+        for(int i = 0, j = 8; i < this.lives; i++, j+=32){
+            app.image(this.playerSprite, j, app.height-32);
+        }
         }
 
         // draw all ghosts

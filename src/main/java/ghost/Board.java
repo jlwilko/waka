@@ -69,7 +69,6 @@ public class Board{
         tileSprites.put("7", app.loadImage("src/main/resources/fruit.png"));
         tileSprites.put("p", null);
         tileSprites.put("g", null);
-        // TODO add the other player sprites here 
         this.tileSprites = tileSprites;
         return;
     }
@@ -80,6 +79,7 @@ public class Board{
                 this.board[i][j].draw(app);
             }
         }
+
     }
 
     public boolean tick(PApplet app){

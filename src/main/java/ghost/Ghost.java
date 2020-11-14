@@ -1,28 +1,50 @@
 package ghost;
 
 import java.util.Arrays;
+import java.util.List;
 
+import processing.core.PApplet;
 import processing.core.PImage;
 
 public class Ghost extends Entity{
 
-    public Ghost(int x, int y, PImage sprite, long speed, Game game){
+    protected GhostMode mode;
+    protected int targetX;
+    protected int targetY;
+    protected int framesSinceChange;
+    protected List<Long> modeLengths;
+    protected int modeIndex;
+
+
+    public Ghost(int x, int y, PImage sprite, long speed, Game game, List<Long> modeLengths){
         super(x, y, sprite, speed, game);
         this.xOff = -6;
+        this.mode = GhostMode.SCATTER;
+        this.targetX = 1;
+        this.targetY = 1;
+        this.framesSinceChange = 0;
+        this.modeLengths = modeLengths;
     }
 
+    public void restart(){
+        super.restart();
+        this.modeIndex = 0;
+        this.framesSinceChange = 0;
+        this.mode = GhostMode.SCATTER;
+    }
 
     public void setNextMovement(App App){
+        this.setTarget();
         Pair arr[] = new Pair[4];
 
-        arr[0] = new Pair(calculateDistanceToPlayer(this.x + Direction.LEFT.xVel, 
-                        this.y + Direction.LEFT.yVel), Direction.LEFT);
-        arr[1] = new Pair(calculateDistanceToPlayer(this.x + Direction.RIGHT.xVel,
-                        this.y + Direction.RIGHT.yVel),Direction.RIGHT);
-        arr[2] = new Pair(calculateDistanceToPlayer(this.x + Direction.DOWN.xVel, 
-                        this.y + Direction.DOWN.yVel),Direction.DOWN);
-        arr[3] = new Pair(calculateDistanceToPlayer(this.x + Direction.UP.xVel, 
-                        this.y + Direction.UP.yVel),Direction.UP);
+        arr[0] = new Pair(calculateDistanceToTarget(this.x + Direction.LEFT.xVel, 
+                        this.y + Direction.LEFT.yVel, targetX, targetY), Direction.LEFT);
+        arr[1] = new Pair(calculateDistanceToTarget(this.x + Direction.RIGHT.xVel,
+                        this.y + Direction.RIGHT.yVel, targetX, targetY),Direction.RIGHT);
+        arr[2] = new Pair(calculateDistanceToTarget(this.x + Direction.DOWN.xVel, 
+                        this.y + Direction.DOWN.yVel, targetX, targetY),Direction.DOWN);
+        arr[3] = new Pair(calculateDistanceToTarget(this.x + Direction.UP.xVel, 
+                        this.y + Direction.UP.yVel, targetX, targetY),Direction.UP);
 
         Arrays.sort(arr);
 
@@ -36,11 +58,46 @@ public class Ghost extends Entity{
         }
         this.nextMovement = arr[i].direction;
     }
+
+    public boolean tick(App app){
+        boolean res = super.tick(app);
+        this.framesSinceChange++;
+        System.out.printf("frames = %d, swapping at %d\n", this.framesSinceChange, (long)app.frameRate*game.modeLengths.get(modeIndex));
+        System.out.printf("Mode = %s", this.mode);
+        
+
+        long currentModeLength = (long) 60*game.modeLengths.get(modeIndex);
+        if (this.framesSinceChange >= currentModeLength){
+            this.framesSinceChange %= currentModeLength;
+            this.modeIndex++;
+            this.modeIndex %= this.modeLengths.size();
+            this.mode = this.mode.change();
+        }
+        return res;
+
+    }
+
+
+    public void draw(PApplet app){
+        super.draw(app);
+        app.stroke(255);
+        app.line(x*16+8, y*16+8, targetX*16+8, targetY*16+8);
+    }
+
+    private void setTarget(){
+        if (this.mode == GhostMode.SCATTER){
+            this.targetX = this.game.getPlayerX();
+            this.targetY = this.game.getPlayerY();
+        } else {
+            this.targetX = Corner.BOTTOMRIGHT.x;
+            this.targetY = Corner.BOTTOMRIGHT.y;
+        }
+    }
     
-    private double calculateDistanceToPlayer(int x, int y){
+    private double calculateDistanceToTarget(int x, int y, int targetX, int targetY){
         Square sqr = (dist) -> (dist*dist);
-        int dx = sqr.apply(x - this.game.getPlayerX());
-        int dy = sqr.apply(y - this.game.getPlayerY());
+        int dx = sqr.apply(x - targetX);
+        int dy = sqr.apply(y - targetY);
         return Math.sqrt(dx + dy);
     }
 
@@ -61,5 +118,40 @@ class Pair implements Comparable<Pair>{
 
     public int compareTo(Pair other){
         return (this.distance > other.distance)? 1 : -1;
+    }
+}
+
+enum GhostMode{
+    CHASE(){
+        public GhostMode change(){
+            return GhostMode.SCATTER;
+        }
+    },
+    SCATTER{
+        public GhostMode change(){
+            return GhostMode.CHASE;
+        }
+    },
+    FRIGHTENED{
+        public GhostMode change(){
+            return GhostMode.CHASE; //TODO  this needs to change, does not meet spec
+        }
+    };
+
+    public abstract GhostMode change();
+}
+
+enum Corner{
+    TOPLEFT(1,4),
+    TOPRIGHT(23,4),
+    BOTTOMLEFT(1,28),
+    BOTTOMRIGHT(26,32);
+
+    public int x;
+    public int y;
+
+    private Corner(int x, int y){
+        this.x = x;
+        this.y = y;
     }
 }
