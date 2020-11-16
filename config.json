@@ -1,15 +1,14 @@
 {
     "map": "map.txt",
-    "lives": 3,
+    "lives": 10,
     "speed": 2,
     "modeLengths": [
         7,
         20,
         7,
         20,
-        5,
+        7,
         20,
-        5,
         1000
     ]
 }
