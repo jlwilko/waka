@@ -2,7 +2,6 @@ package ghost;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -16,12 +15,11 @@ public class Board{
 
     private Map<String,PImage> tileSprites;
 
-    public Board(String filename, Game game, PApplet app){
+    public Board(String filename, Game game, PApplet app, Map<String, PImage> spriteMap){
         this.board = new Tile[36][28]; 
         this.game = game;
 
-        createSpriteHashMap(app);
-
+        this.tileSprites = spriteMap;
         File file = new File(filename);
         try{
             Scanner sc = new Scanner(file);
@@ -32,11 +30,10 @@ public class Board{
                 int column = 0;
 
                 for (String string : line) {
-
-                    PImage sprite = tileSprites.get(string);
+                    PImage sprite = spriteMap.get(string);
                     int id = sprite != null ? Integer.parseInt(string) : 0;
                     this.board[row][column] = new Tile(sprite, column, row, id);
-                    if (id == 7){
+                    if (this.isFruitTile(column, row)){
                         fruitNumber++;
                     }
 
@@ -56,22 +53,6 @@ public class Board{
 
     }
 
-    private void createSpriteHashMap(PApplet app){
-        Map<String, PImage> tileSprites = new HashMap<>();
-        // TODO make these strings more descriptive 
-        tileSprites.put("0", null);
-        tileSprites.put("1", app.loadImage("src/main/resources/horizontal.png"));
-        tileSprites.put("2", app.loadImage("src/main/resources/vertical.png"));
-        tileSprites.put("3", app.loadImage("src/main/resources/upLeft.png"));
-        tileSprites.put("4", app.loadImage("src/main/resources/upRight.png"));
-        tileSprites.put("5", app.loadImage("src/main/resources/downLeft.png"));
-        tileSprites.put("6", app.loadImage("src/main/resources/downRight.png"));
-        tileSprites.put("7", app.loadImage("src/main/resources/fruit.png"));
-        tileSprites.put("p", null);
-        tileSprites.put("g", null);
-        this.tileSprites = tileSprites;
-        return;
-    }
 
     public void draw(PApplet app){
         for(int i = 0; i < this.board.length; i++){
@@ -89,6 +70,9 @@ public class Board{
         int subY = game.getPlayerSubY();
 
         if ((subX == 0 && subY == 0) && isFruitTile(x, y)){
+            if (isSuperFruitTile(x,y)){
+                this.game.startFrightenedMode();
+            }
             board[y][x] = new Tile(tileSprites.get("0"), x, y, 0);
             this.fruitNumber--;
             // System.out.printf("Remaining fruit: %d", this.fruitNumber);
@@ -103,11 +87,17 @@ public class Board{
     }
 
     public boolean checkBoardTile(int Xcoord, int Ycoord){
-        return (this.board[Ycoord][Xcoord].getID() == 0 || this.board[Ycoord][Xcoord].getID() == 7);
+        return (this.board[Ycoord][Xcoord].getID() == 0 || this.isFruitTile(Xcoord, Ycoord));
     }
     
     public boolean isFruitTile(int Xcoord, int Ycoord){
-        return (this.board[Ycoord][Xcoord].getID() == 7);
+        int tileID = this.board[Ycoord][Xcoord].getID();
+        return (tileID == 7 || tileID == 8);
+    }
+
+    public boolean isSuperFruitTile(int Xcoord, int Ycoord){
+        int tileID = this.board[Ycoord][Xcoord].getID();
+        return (tileID == 8);
     }
 
     public void restart(String filename){
@@ -125,7 +115,7 @@ public class Board{
                     PImage sprite = tileSprites.get(string);
                     int id = sprite != null ? Integer.parseInt(string) : 0;
                     this.board[row][column] = new Tile(sprite, column, row, id);
-                    if (id == 7){
+                    if (id == 7 || id == 8){
                         fruitNumber++;
                     }
 

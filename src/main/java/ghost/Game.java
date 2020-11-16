@@ -18,20 +18,28 @@ import processing.core.PFont;
 import processing.core.PImage;
 
 public class Game {
-    private Board board;
     private long speed;
     private long lives;
+    private long startingLives;
     private String mapfile;
 
-    public List<Long> modeLengths;
     // private Player player;
-    private List<Ghost> ghosts;
-    private Player player;
+    public List<Ghost> ghosts;
 
-    private boolean won;
-    private int framesSinceWon;
+    public Ghost chaser;
+
+    public Player player;
+    public Board board;
+    public List<Long> modeLengths;
+
+    public boolean won;
+    public boolean gameOver;
+    private int framesSinceDelay;
+
 
     private PFont font;
+    private String displayText;
+
     private PImage playerSprite;
 
 
@@ -43,6 +51,7 @@ public class Game {
             JSONObject jsonObj = (JSONObject)obj;
 
             this.lives = (long)(jsonObj.get("lives"));
+            this.startingLives = this.lives;
             this.speed = (long)jsonObj.get("speed");
             this.modeLengths = getArrayFromJSON(jsonObj.get("modeLengths"));
             this.mapfile = (String)jsonObj.get("map");
@@ -55,22 +64,43 @@ public class Game {
         
 
         this.won = false;
-        this.framesSinceWon = 0;
-
+        this.gameOver = false;
+        this.framesSinceDelay = 0;
     }
 
     public void setup(PApplet app){
         
         this.font = app.createFont("src/main/resources/PressStart2P-Regular.ttf",30);
-        this.board = new Board(mapfile, this, app);
-        this.ghosts = findGhosts(mapfile, app);
+        Map<String, PImage> tileSprites = new HashMap<>();
+        // TODO make these strings more descriptive 
+        tileSprites.put("0", null);
+        tileSprites.put("1", app.loadImage("src/main/resources/horizontal.png"));
+        tileSprites.put("2", app.loadImage("src/main/resources/vertical.png"));
+        tileSprites.put("3", app.loadImage("src/main/resources/upLeft.png"));
+        tileSprites.put("4", app.loadImage("src/main/resources/upRight.png"));
+        tileSprites.put("5", app.loadImage("src/main/resources/downLeft.png"));
+        tileSprites.put("6", app.loadImage("src/main/resources/downRight.png"));
+        tileSprites.put("7", app.loadImage("src/main/resources/fruit.png"));
+        tileSprites.put("8", app.loadImage("src/main/resources/superFruit.png"));
+        tileSprites.put("p", null);
+        tileSprites.put("g", null);
+        this.board = new Board(mapfile, this, app, tileSprites);
+        Map<String, PImage> ghostSprites = new HashMap<>();
+        ghostSprites.put("a", app.loadImage("src/main/resources/ambusher.png"));
+        ghostSprites.put("c", app.loadImage("src/main/resources/chaser.png"));
+        ghostSprites.put("i", app.loadImage("src/main/resources/ignorant.png"));
+        ghostSprites.put("w", app.loadImage("src/main/resources/whim.png"));
+        PImage frightenedSprite = app.loadImage("src/main/resources/frightened.png");
+
+        this.ghosts = findGhosts(mapfile, app, ghostSprites, frightenedSprite);
         this.player = findPlayer(mapfile,app);
         this.playerSprite = app.loadImage("src/main/resources/playerRight.png");
 
     }
 
-    public List<Ghost> findGhosts(String mapfile, PApplet app){
+    public List<Ghost> findGhosts(String mapfile, PApplet app, Map<String, PImage> spriteMap, PImage frightenedSprite){
         List<Ghost> ghosts = new ArrayList<Ghost>();
+
         File file = new File(mapfile);
         try{
             Scanner sc = new Scanner(file);
@@ -81,10 +111,31 @@ public class Game {
                 int column = 0;
 
                 for (String string : line) {
-                    if (string.equals("g")){
-                        ghosts.add(new Ghost(column,row,
-                                   app.loadImage("src/main/resources/ghost.png"), 
-                                   this.speed, this, this.modeLengths));
+                    switch (string){
+                        case "a":
+                            ghosts.add(new Ambusher(column,row,
+                                    spriteMap.get(string), 
+                                    this.speed, this, this.modeLengths, frightenedSprite));
+                            break;
+                        case "c":
+                            Chaser c = new Chaser(column, row, spriteMap.get(string), this.speed, 
+                                this, this.modeLengths, frightenedSprite);
+                            ghosts.add(c);
+                            this.chaser = c;
+                            break;
+                        case "i":
+                            ghosts.add(new Ignorant(column,row,
+                                    spriteMap.get(string), 
+                                    this.speed, this, this.modeLengths, frightenedSprite));
+                            break;
+                        case "w":
+                            ghosts.add(new Whim(column,row,
+                                    spriteMap.get(string), 
+                                    this.speed, this, this.modeLengths, frightenedSprite));
+                            break;
+                        default:
+                            break;
+
                     }
                     column++;
                 }
@@ -131,12 +182,12 @@ public class Game {
     }
 
     public void draw(PApplet app){
-        if (this.won){
+        if (this.won || this.gameOver){
             app.background(0,0,0);
             app.textFont(this.font,30);                  // STEP 3 Specify font to be used
             app.fill(255);                         // STEP 4 Specify font color 
             app.textAlign(PApplet.CENTER);
-            app.text("YOU WIN",app.width/2,app.height/3);   // STEP 5 Display Text 
+            app.text(this.displayText,app.width/2,app.height/3);   // STEP 5 Display Text 
         } else {
         this.board.draw(app);
         for (Ghost g : this.ghosts){
@@ -153,37 +204,68 @@ public class Game {
     }
 
     public void tick(App app){
-        if (!this.won){
-        for (Ghost g : this.ghosts){
-            g.setNextMovement(app);
-            g.tick(app);
-        }
-        this.player.setNextMovement(app);
-        this.player.tick(app);
-        this.won = this.board.tick(app);
-            
-        } else {
-            // System.out.printf("You won, good work!\n");
-            this.framesSinceWon++;
-            
-            if (this.framesSinceWon > 60*10){
-                // System.out.printf("restarting game now\n");
-                this.restart();
+        if (!this.won && !this.gameOver){
+            for (Ghost g : this.ghosts){
+                g.setNextMovement(app);
+                g.tick(app);
             }
-        } 
-
+            this.player.setNextMovement(app);
+            this.player.tick(app);
+            this.won = this.board.tick(app);
+                
+            if (this.won){
+                this.displayText = "YOU WIN";
+            }
+        } else {
+            System.out.printf("frames since changed = %d\n", this.framesSinceDelay);
+            this.framesSinceDelay++;
+            
+            if (this.framesSinceDelay > 60*10){
+                // System.out.printf("restarting game now\n");
+                this.restart(true);
+            }
+        }
     }
 
-    public void restart(){
-        this.framesSinceWon = 0;
+    public void restart(boolean gameFinished){
+        this.framesSinceDelay = 0;
         for (Ghost g : this.ghosts){
             g.restart();
         }
         player.restart();
-        board.restart(this.mapfile);
-        this.won = false;
+        if (gameFinished){
+            board.restart(this.mapfile);
+            this.won = false;
+            this.gameOver = false;
+            this.lives = this.startingLives;
+        }
     }
 
+    public void startFrightenedMode(){
+        System.out.printf("make ghosts scared\n");
+        for (Ghost g : ghosts){
+            g.frighten();
+        }
+    };
+
+    public boolean detectCollision(){
+        for (Ghost g : this.ghosts){
+            // if (g.calculateDistanceToTarget(g.x,g.y, this.player.x, this.player.y) <= 1){
+            if((this.getPlayerX() == g.x) && (this.getPlayerY() == g.y)){
+                if (g.mode == GhostMode.FRIGHTENED){
+                    return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void loseLife(){
+        this.lives--;
+        this.gameOver = this.lives < 0;
+        this.displayText = "GAME OVER";
+    }
 
     private List<Long> getArrayFromJSON(Object array){
         ArrayList<Long> ls = new ArrayList<Long>();
@@ -230,5 +312,21 @@ public class Game {
 
     public int getPlayerSubY(){
         return this.player.subY;
+    }
+
+    public int getPlayerVelX(){
+        return this.player.movement.xVel;
+    }
+
+    public int getPlayerVelY(){
+        return this.player.movement.yVel;
+    }
+
+    public int getChaserX(){
+        return this.chaser.x;
+    }
+
+    public int getChaserY(){
+        return this.chaser.y;
     }
 }

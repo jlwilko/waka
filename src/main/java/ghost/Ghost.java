@@ -2,21 +2,26 @@ package ghost;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import processing.core.PApplet;
 import processing.core.PImage;
 
-public class Ghost extends Entity{
+public abstract class Ghost extends Entity{
 
     protected GhostMode mode;
+    protected GhostMode oldMode;
     protected int targetX;
     protected int targetY;
     protected int framesSinceChange;
     protected List<Long> modeLengths;
     protected int modeIndex;
+    protected PImage frightenedSprite;
+    protected PImage normalSprite;
+    protected int frightenedFrames;
 
 
-    public Ghost(int x, int y, PImage sprite, long speed, Game game, List<Long> modeLengths){
+    public Ghost(int x, int y, PImage sprite, long speed, Game game, List<Long> modeLengths, PImage frightenedSprite){
         super(x, y, sprite, speed, game);
         this.xOff = -6;
         this.mode = GhostMode.SCATTER;
@@ -24,6 +29,10 @@ public class Ghost extends Entity{
         this.targetY = 1;
         this.framesSinceChange = 0;
         this.modeLengths = modeLengths;
+        this.frightenedSprite = frightenedSprite;
+        this.normalSprite = sprite;
+
+        this.frightenedFrames = 0;
     }
 
     public void restart(){
@@ -49,6 +58,17 @@ public class Ghost extends Entity{
         Arrays.sort(arr);
 
         int i = 0;
+        if (this.mode == GhostMode.FRIGHTENED){
+            Random gen = new Random();
+            int rand = gen.nextInt(4);
+            Direction dir = arr[rand].direction;
+            while(dir == this.movement.opposite() || !this.canMove(dir)){
+                rand = gen.nextInt(4);
+                dir = arr[rand].direction;
+            }
+            this.nextMovement = dir;
+            return;
+        }
         while (this.movement == arr[i].direction.opposite() || !this.canMove(arr[i].direction)){
             i++;
             if (i==4){
@@ -62,9 +82,17 @@ public class Ghost extends Entity{
     public boolean tick(App app){
         boolean res = super.tick(app);
         this.framesSinceChange++;
-        System.out.printf("frames = %d, swapping at %d\n", this.framesSinceChange, (long)app.frameRate*game.modeLengths.get(modeIndex));
-        System.out.printf("Mode = %s", this.mode);
+        // System.out.printf("frames = %d, swapping at %d\n", this.framesSinceChange, (long)app.frameRate*game.modeLengths.get(modeIndex));
+        // System.out.printf("Mode = %s", this.mode);
         
+        if (this.mode == GhostMode.FRIGHTENED){
+            this.sprite = this.frightenedSprite;
+            this.frightenedFrames++;
+            if (this.frightenedFrames > 5*60){
+                this.unfrighten();
+            }
+            //TODO make this an attribute
+        }
 
         long currentModeLength = (long) 60*game.modeLengths.get(modeIndex);
         if (this.framesSinceChange >= currentModeLength){
@@ -77,30 +105,32 @@ public class Ghost extends Entity{
 
     }
 
-
     public void draw(PApplet app){
         super.draw(app);
         app.stroke(255);
-        app.line(x*16+8, y*16+8, targetX*16+8, targetY*16+8);
+        app.line(x*16+8+this.subX, y*16+8+this.subY, targetX*16+8, targetY*16+8);
     }
 
-    private void setTarget(){
-        if (this.mode == GhostMode.SCATTER){
-            this.targetX = this.game.getPlayerX();
-            this.targetY = this.game.getPlayerY();
-        } else {
-            this.targetX = Corner.BOTTOMRIGHT.x;
-            this.targetY = Corner.BOTTOMRIGHT.y;
-        }
-    }
+    public abstract void setTarget();
     
-    private double calculateDistanceToTarget(int x, int y, int targetX, int targetY){
+    public double calculateDistanceToTarget(int x, int y, int targetX, int targetY){
         Square sqr = (dist) -> (dist*dist);
         int dx = sqr.apply(x - targetX);
         int dy = sqr.apply(y - targetY);
         return Math.sqrt(dx + dy);
     }
 
+    public void frighten(){
+        this.oldMode = this.mode;
+        this.mode = GhostMode.FRIGHTENED;
+        this.sprite = frightenedSprite;
+    }
+
+    public void unfrighten(){
+        this.mode = this.oldMode;
+        this.sprite = normalSprite;
+        this.frightenedFrames = 0;
+    }
 
 }
 interface Square{
@@ -122,7 +152,7 @@ class Pair implements Comparable<Pair>{
 }
 
 enum GhostMode{
-    CHASE(){
+    CHASE{
         public GhostMode change(){
             return GhostMode.SCATTER;
         }
@@ -134,7 +164,7 @@ enum GhostMode{
     },
     FRIGHTENED{
         public GhostMode change(){
-            return GhostMode.CHASE; //TODO  this needs to change, does not meet spec
+            return GhostMode.FRIGHTENED; //TODO  this needs to change, does not meet spec
         }
     };
 
@@ -142,10 +172,10 @@ enum GhostMode{
 }
 
 enum Corner{
-    TOPLEFT(1,4),
-    TOPRIGHT(23,4),
-    BOTTOMLEFT(1,28),
-    BOTTOMRIGHT(26,32);
+    TOPLEFT(0,0),
+    TOPRIGHT(27,0),
+    BOTTOMLEFT(0,35),
+    BOTTOMRIGHT(27,35);
 
     public int x;
     public int y;

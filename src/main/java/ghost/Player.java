@@ -26,6 +26,11 @@ public class Player extends Entity{
 
     public boolean tick(App app){
         boolean res = super.tick(app);
+        if (this.game.detectCollision()){
+            
+            this.game.loseLife();
+            this.game.restart(false);
+        }
         this.framesSinceChange++;
         // System.out.printf("frames = %d\n", this.framesSinceChange);
         
