@@ -96,7 +96,7 @@ public class Game {
         String[] keys = {"a", "c", "i", "w"};
         for (int i = 0; i < files.length; i++){
             ghostSprites.put(keys[i], app.loadImage(files[i] + ".png"));
-            ghostSprites.put(keys[i]+"soda", null);
+            ghostSprites.put(keys[i]+"soda", app.loadImage((files[i] + "soda.png")));
         }
         ghostSprites.put("f", app.loadImage("src/main/resources/frightened.png"));
         ghostSprites.put("d", null);

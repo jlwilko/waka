@@ -6,6 +6,17 @@ import java.util.Map;
 import processing.core.PImage;
 
 public class Ignorant extends Ghost{
+    /**
+     * 
+     * @param x
+     * @param y
+     * @param sprite
+     * @param speed
+     * @param game
+     * @param modeLengths
+     * @param frightenedLength
+     * @param sprites
+     */
     public Ignorant(int x, int y, PImage sprite, long speed, Game game, List<Long> modeLengths, long frightenedLength, Map<String, PImage> sprites){
         super(x,y,sprite,speed,game,modeLengths,frightenedLength, sprites);
         this.sodaSprite = sprites.get("isoda");

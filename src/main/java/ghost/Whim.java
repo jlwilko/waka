@@ -21,12 +21,9 @@ public class Whim extends Ghost{
             this.targetY = this.game.getChaserY() + 2*dy;
             LimitRange.limit(this.targetX, 0, 27);
             LimitRange.limit(this.targetY, 0, 35);
-        } else if (this.mode == GhostMode.SCATTER){
+        } else {
             this.targetX = Corner.BOTTOMRIGHT.x;
             this.targetY = Corner.BOTTOMRIGHT.y;
-        } else {
-            // FRIGHTENED MODE
-            
         }
     }
 }

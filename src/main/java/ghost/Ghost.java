@@ -147,13 +147,17 @@ public abstract class Ghost extends Entity{
 
     public void soda(){
         this.frightenedFrames = 0;
-        this.oldMode = this.mode;
-        this.mode = GhostMode.SODA;
-        this.sprite = sodaSprite;
+        if (this.mode == GhostMode.CHASE || this.mode == GhostMode.SCATTER){
+            this.oldMode = this.mode;
+        }
+            this.mode = GhostMode.SODA;
+            this.sprite = sodaSprite;
     }
 
     public void unsoda(){
-        this.mode = this.oldMode;
+        if (this.mode == GhostMode.CHASE || this.mode == GhostMode.SCATTER){
+            this.mode = this.oldMode;
+        }
         this.sprite = normalSprite;
         this.frightenedFrames = 0;
     }

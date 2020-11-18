@@ -2,23 +2,42 @@ package ghost;
 
 public enum Direction {
 
+    /**
+     * Direction Up
+     */
     UP(0,-1){
         public Direction opposite(){
             return DOWN;
         }
-    },DOWN(0,1){
+    },
+    /**
+     * Direction down
+     */
+    DOWN(0,1){
         public Direction opposite(){
             return UP;
         }
-    },LEFT(-1,0){
+    },
+    /**
+     * Direction Left
+     */
+    LEFT(-1,0){
         public Direction opposite(){
             return RIGHT;
         }
-    },RIGHT(1,0){
+    },
+    /** 
+     * Direction Right
+     */
+    RIGHT(1,0){
         public Direction opposite(){
             return LEFT;
         }
-    },NONE(0,0){
+    },
+    /** 
+     * Direction None
+     */
+    NONE(0,0){
         public Direction opposite(){
             return NONE;
         }
