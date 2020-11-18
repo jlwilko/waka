@@ -10,21 +10,34 @@ import processing.core.PImage;
 
 public abstract class Ghost extends Entity{
 
+    /** current mode of the Ghost  */
     protected GhostMode mode;
+    /** Old mode of the ghost */
     protected GhostMode oldMode;
+    /** Target x for this ghost  */
     protected int targetX;
+    /** Target y for this ghost */
     protected int targetY;
+    /** Frames since the current mode started */
     protected int framesSinceChange;
+    /** List of modeLengths for SCATTER and CHASE */
     protected List<Long> modeLengths;
+    /** Counter for which mode we are currently in */
     protected int modeIndex;
+    /** Image for the frightened sprite for the ghost  */
     protected PImage frightenedSprite;
+    /** Image for the dead sprite for the ghost  */
     protected PImage deadSprite;
+    /** Image for the normal sprite for the ghost  */
     protected PImage normalSprite;
+    /** Image for the soda sprite for the ghost  */
     protected PImage sodaSprite;
+    /** counter for the number of frames passed in frightened mode */
     protected int frightenedFrames;
+    /** Length of frightened mode */
     protected long frightenedLength;
+    /** boolean value if the ghost is currently alive */
     protected boolean alive;
-
 
     /**
      * Constructor for the Ghost Class 
