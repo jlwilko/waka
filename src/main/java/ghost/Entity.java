@@ -55,6 +55,9 @@ public abstract class Entity {
     public abstract void setNextMovement(App app);
 
     public void draw(PApplet app){
+        if (this.sprite == null){
+            return;
+        }
         app.image(this.sprite, x*16+subX+xOff, y*16+subY+yOff);
     }
 

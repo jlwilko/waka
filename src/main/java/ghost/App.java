@@ -36,4 +36,10 @@ public class App extends PApplet {
         PApplet.main("ghost.App");
     }
 
+
+    public void keyReleased(){
+        if (key == ' '){
+            this.game.toggleDebug();
+        }
+    }
 }

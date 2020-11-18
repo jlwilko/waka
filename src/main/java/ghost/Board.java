@@ -31,6 +31,9 @@ public class Board{
 
                 for (String string : line) {
                     PImage sprite = spriteMap.get(string);
+                    if (string.equals("9")){
+                        ;
+                    }
                     int id = sprite != null ? Integer.parseInt(string) : 0;
                     this.board[row][column] = new Tile(sprite, column, row, id);
                     if (this.isFruitTile(column, row)){
@@ -69,9 +72,12 @@ public class Board{
         int subX = game.getPlayerSubX();
         int subY = game.getPlayerSubY();
 
+        System.out.printf("Fruit remaining: %d\n", this.fruitNumber);
         if ((subX == 0 && subY == 0) && isFruitTile(x, y)){
             if (isSuperFruitTile(x,y)){
                 this.game.startFrightenedMode();
+            } else if (isSodaCanTile(x, y)){
+                this.game.startSodaMode();
             }
             board[y][x] = new Tile(tileSprites.get("0"), x, y, 0);
             this.fruitNumber--;
@@ -92,12 +98,17 @@ public class Board{
     
     public boolean isFruitTile(int Xcoord, int Ycoord){
         int tileID = this.board[Ycoord][Xcoord].getID();
-        return (tileID == 7 || tileID == 8);
+        return (tileID == 7 || tileID == 8 || tileID == 9);
     }
 
     public boolean isSuperFruitTile(int Xcoord, int Ycoord){
         int tileID = this.board[Ycoord][Xcoord].getID();
         return (tileID == 8);
+    }
+
+    public boolean isSodaCanTile(int Xcoord, int Ycoord){
+        int tileID = this.board[Ycoord][Xcoord].getID();
+        return (tileID == 9);
     }
 
     public void restart(String filename){
@@ -115,7 +126,7 @@ public class Board{
                     PImage sprite = tileSprites.get(string);
                     int id = sprite != null ? Integer.parseInt(string) : 0;
                     this.board[row][column] = new Tile(sprite, column, row, id);
-                    if (id == 7 || id == 8){
+                    if (id == 7 || id == 8 || id == 9){
                         fruitNumber++;
                     }
 

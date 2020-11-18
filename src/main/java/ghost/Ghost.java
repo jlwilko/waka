@@ -2,6 +2,7 @@ package ghost;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import processing.core.PApplet;
@@ -17,11 +18,15 @@ public abstract class Ghost extends Entity{
     protected List<Long> modeLengths;
     protected int modeIndex;
     protected PImage frightenedSprite;
+    protected PImage deadSprite;
     protected PImage normalSprite;
+    protected PImage sodaSprite;
     protected int frightenedFrames;
+    protected long frightenedLength;
+    protected boolean alive;
 
 
-    public Ghost(int x, int y, PImage sprite, long speed, Game game, List<Long> modeLengths, PImage frightenedSprite){
+    public Ghost(int x, int y, PImage sprite, long speed, Game game, List<Long> modeLengths, long frightenedLength, Map<String, PImage> sprites){
         super(x, y, sprite, speed, game);
         this.xOff = -6;
         this.mode = GhostMode.SCATTER;
@@ -29,16 +34,22 @@ public abstract class Ghost extends Entity{
         this.targetY = 1;
         this.framesSinceChange = 0;
         this.modeLengths = modeLengths;
-        this.frightenedSprite = frightenedSprite;
+        this.frightenedLength = frightenedLength;
+        this.frightenedSprite = sprites.get("f");
         this.normalSprite = sprite;
-
+        this.deadSprite = sprites.get("d");
         this.frightenedFrames = 0;
+
+        this.alive = true;
     }
 
     public void restart(){
         super.restart();
         this.modeIndex = 0;
         this.framesSinceChange = 0;
+        this.alive = true;
+        this.unfrighten();
+        this.unsoda();
         this.mode = GhostMode.SCATTER;
     }
 
@@ -85,13 +96,12 @@ public abstract class Ghost extends Entity{
         // System.out.printf("frames = %d, swapping at %d\n", this.framesSinceChange, (long)app.frameRate*game.modeLengths.get(modeIndex));
         // System.out.printf("Mode = %s", this.mode);
         
-        if (this.mode == GhostMode.FRIGHTENED){
-            this.sprite = this.frightenedSprite;
+        if (this.mode == GhostMode.FRIGHTENED || this.mode == GhostMode.SODA){
             this.frightenedFrames++;
-            if (this.frightenedFrames > 5*60){
+            if (this.frightenedFrames > this.frightenedLength*60){
                 this.unfrighten();
+                this.unsoda();
             }
-            //TODO make this an attribute
         }
 
         long currentModeLength = (long) 60*game.modeLengths.get(modeIndex);
@@ -105,10 +115,12 @@ public abstract class Ghost extends Entity{
 
     }
 
-    public void draw(PApplet app){
+    public void draw(PApplet app, boolean debug){
         super.draw(app);
-        app.stroke(255);
-        app.line(x*16+8+this.subX, y*16+8+this.subY, targetX*16+8, targetY*16+8);
+        if (debug){
+            app.stroke(255);
+            app.line(x*16+8+this.subX, y*16+8+this.subY, targetX*16+8, targetY*16+8);
+        }
     }
 
     public abstract void setTarget();
@@ -121,6 +133,7 @@ public abstract class Ghost extends Entity{
     }
 
     public void frighten(){
+        this.frightenedFrames = 0;
         this.oldMode = this.mode;
         this.mode = GhostMode.FRIGHTENED;
         this.sprite = frightenedSprite;
@@ -130,6 +143,28 @@ public abstract class Ghost extends Entity{
         this.mode = this.oldMode;
         this.sprite = normalSprite;
         this.frightenedFrames = 0;
+    }
+
+    public void soda(){
+        this.frightenedFrames = 0;
+        this.oldMode = this.mode;
+        this.mode = GhostMode.SODA;
+        this.sprite = sodaSprite;
+    }
+
+    public void unsoda(){
+        this.mode = this.oldMode;
+        this.sprite = normalSprite;
+        this.frightenedFrames = 0;
+    }
+
+    public void kill(){
+        this.alive = false;
+        this.sprite = this.deadSprite;
+    }
+
+    public boolean isDead(){
+        return !this.alive;
     }
 
 }
@@ -164,7 +199,12 @@ enum GhostMode{
     },
     FRIGHTENED{
         public GhostMode change(){
-            return GhostMode.FRIGHTENED; //TODO  this needs to change, does not meet spec
+            return GhostMode.FRIGHTENED;
+        }
+    },
+    SODA{
+        public GhostMode change(){
+            return GhostMode.SODA;
         }
     };
 
