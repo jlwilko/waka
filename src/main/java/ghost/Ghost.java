@@ -62,6 +62,7 @@ public abstract class Ghost extends Entity{
         this.modeIndex = 0;
         this.framesSinceChange = 0;
         this.alive = true;
+        // Need to reset both modes to make sure the object has been completely reset
         this.unfrighten();
         this.unsoda();
         this.mode = GhostMode.SCATTER;
@@ -74,6 +75,7 @@ public abstract class Ghost extends Entity{
         this.setTarget();
         Pair arr[] = new Pair[4];
 
+        // calculate a pair for the distance and direction in eeach of the four directions 
         arr[0] = new Pair(calculateDistanceToTarget(this.x + Direction.LEFT.xVel, 
                         this.y + Direction.LEFT.yVel, targetX, targetY), Direction.LEFT);
         arr[1] = new Pair(calculateDistanceToTarget(this.x + Direction.RIGHT.xVel,
@@ -83,6 +85,7 @@ public abstract class Ghost extends Entity{
         arr[3] = new Pair(calculateDistanceToTarget(this.x + Direction.UP.xVel, 
                         this.y + Direction.UP.yVel, targetX, targetY),Direction.UP);
 
+        // Sort the array by distance 
         Arrays.sort(arr);
 
         int i = 0;
@@ -97,6 +100,9 @@ public abstract class Ghost extends Entity{
             this.nextMovement = dir;
             return;
         }
+
+        // Loop through the array until we find a value that is not opposite the current direction 
+        // or not walk into a wall
         while (this.movement == arr[i].direction.opposite() || !this.canMove(arr[i].direction)){
             i++;
             if (i==4){
@@ -104,6 +110,7 @@ public abstract class Ghost extends Entity{
                 return;
             }
         }
+        // update the movement direction for the ghost
         this.nextMovement = arr[i].direction;
     }
 
