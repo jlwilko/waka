@@ -3,13 +3,113 @@
  */
 package ghost;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import processing.core.PApplet;
 
 class AppTest {
+    
     @Test 
     public void simpleTest() {
         App classUnderTest = new App();
         assertNotNull(classUnderTest);
+    }
+    
+    // @Test public void Anothertest(){
+    //     App test = new App();
+    //     Game game = new Game("config.json", test);
+    //     assertNotNull(game);
+    //     Map<String, PImage> tileSprites = new HashMap<>();
+    //     tileSprites.put("0", null);
+    //     tileSprites.put("1", null);
+    //     tileSprites.put("2", null);
+    //     tileSprites.put("3", null);
+    //     tileSprites.put("4", null);
+    //     tileSprites.put("5", null);
+    //     tileSprites.put("6", null);
+    //     tileSprites.put("7", null);
+    //     tileSprites.put("p", null);
+    //     tileSprites.put("g", null);
+    //     Board board = new Board("map.txt", game, test, tileSprites);
+    //     Map<String, PImage> ghostSprites = new HashMap<>();
+    //     ghostSprites.put("a", null);
+    //     ghostSprites.put("c", null);
+    //     ghostSprites.put("i", null);
+    //     ghostSprites.put("w", null);
+    //     // game.ghosts = game.findGhosts("map.txt", test, ghostSprites);
+    //     System.out.println(game.ghosts);
+        
+    //     // game.ghosts.get(0).restart();
+    //     Map<Direction,PImage> map = new HashMap<>();
+    //     map.put(Direction.DOWN, null);
+    //     map.put(Direction.UP, null);
+    //     map.put(Direction.RIGHT, null);
+    //     map.put(Direction.LEFT, null);
+    //     map.put(Direction.NONE, null);
+    //     Player p = new Player(3,4,map,1,game);
+    //     p.getTileX();
+    //     p.getTileY();
+    //     p.getMovementDirection();
+    //     p.setNextMovement(test);
+    //     game.player = p;
+    //     game.board = board;
+    //     board.tick(test);
+    //     for (int i = 0; i < 10; i++){
+    //         p.tick(test);
+    //         game.ghosts.get(0).tick(test);
+    //         game.ghosts.get(0).setNextMovement(test);
+    //     }
+        
+    //     game.tick(test);
+    //     p.restart();
+
+    //     // game.tick(test);
+    // }
+
+    @Test
+    public void testTile(){
+        App test = new App();
+        Tile t = new Tile(null, 1,1,1);
+        assertEquals(t.getID(),1);
+        t.draw(test);
+    }
+
+    @Test
+    public void TestDirection(){
+        assertEquals(Direction.LEFT.opposite(), Direction.RIGHT);
+        assertEquals(Direction.RIGHT.opposite(), Direction.LEFT);
+        assertEquals(Direction.UP.opposite(), Direction.DOWN);
+        assertEquals(Direction.DOWN.opposite(), Direction.UP);
+        assertEquals(Direction.NONE.opposite(), Direction.NONE);
+    }
+
+    @Test
+    public void TestGhostMode(){
+        assertEquals(GhostMode.CHASE.change(), GhostMode.SCATTER);
+        assertEquals(GhostMode.SCATTER.change(), GhostMode.CHASE);
+        assertEquals(GhostMode.FRIGHTENED.change(), GhostMode.FRIGHTENED);
+    }
+
+
+    @Test
+    public void TestAppletCreation(){
+        App test = new App();
+        PApplet.runSketch(new String[] {"a"}, test);
+        test.setup();
+        test.draw();
+        test.key = 'w';
+        test.keyPressed = true;
+        // use this to test the movement direction things
+        test.game.player.tick(test);
+        test.draw();
+        //test.game.won = true;
+        test.draw();
+        test.game.restart(false);
+        for (int i = 0; i < 100; i++) {
+            test.draw(); 
+        }
     }
 }

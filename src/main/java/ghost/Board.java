@@ -72,7 +72,7 @@ public class Board{
         int subX = game.getPlayerSubX();
         int subY = game.getPlayerSubY();
 
-        System.out.printf("Fruit remaining: %d\n", this.fruitNumber);
+        // System.out.printf("Fruit remaining: %d\n", this.fruitNumber);
         if ((subX == 0 && subY == 0) && isFruitTile(x, y)){
             if (isSuperFruitTile(x,y)){
                 this.game.startFrightenedMode();
