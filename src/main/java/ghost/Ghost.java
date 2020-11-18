@@ -26,6 +26,17 @@ public abstract class Ghost extends Entity{
     protected boolean alive;
 
 
+    /**
+     * Constructor for the Ghost Class 
+     * @param x Tile x position of the ghost 
+     * @param y Tile y position of the ghost
+     * @param sprite Sprite for the ghost 
+     * @param speed Pixels moved per frame 
+     * @param game Reference to the game object
+     * @param modeLengths The lengths of the SCATTER and CHASE modes
+     * @param frightenedLength The length in seconds of the FRIGHTENED mode
+     * @param sprites the map of sprites for the ghost to utilise 
+     */
     public Ghost(int x, int y, PImage sprite, long speed, Game game, List<Long> modeLengths, long frightenedLength, Map<String, PImage> sprites){
         super(x, y, sprite, speed, game);
         this.xOff = -6;
@@ -43,6 +54,9 @@ public abstract class Ghost extends Entity{
         this.alive = true;
     }
 
+    /**
+     * Restarts the board upon the win/game over screen being shown 
+     */
     public void restart(){
         super.restart();
         this.modeIndex = 0;
@@ -53,6 +67,9 @@ public abstract class Ghost extends Entity{
         this.mode = GhostMode.SCATTER;
     }
 
+    /**
+     * Sets the next movement of the Ghost based on the current target location 
+     */
     public void setNextMovement(App App){
         this.setTarget();
         Pair arr[] = new Pair[4];
@@ -90,6 +107,9 @@ public abstract class Ghost extends Entity{
         this.nextMovement = arr[i].direction;
     }
 
+    /**
+     * Progresses the logic for one frame 
+     */
     public boolean tick(App app){
         boolean res = super.tick(app);
         this.framesSinceChange++;
@@ -115,6 +135,11 @@ public abstract class Ghost extends Entity{
 
     }
 
+    /**
+     * Draws the Ghost sprite to the screen of the applet 
+     * @param app The reference to the applet for the drawing methods 
+     * @param debug Boolean value for whether to show the debug lines 
+     */
     public void draw(PApplet app, boolean debug){
         super.draw(app);
         if (debug){
@@ -125,6 +150,14 @@ public abstract class Ghost extends Entity{
 
     public abstract void setTarget();
     
+    /**
+     * Calculates the distance from the current position to the given target position
+     * @param x The x location of the current entity 
+     * @param y The y location of the current entity 
+     * @param targetX The x location of the target Entity 
+     * @param targetY The y location of the target Entity
+     * @return A double of the straight line distance between the two entities
+     */
     public double calculateDistanceToTarget(int x, int y, int targetX, int targetY){
         Square sqr = (dist) -> (dist*dist);
         int dx = sqr.apply(x - targetX);
@@ -132,6 +165,9 @@ public abstract class Ghost extends Entity{
         return Math.sqrt(dx + dy);
     }
 
+    /**
+     * Sets the mode to the frightened and begins the frightened counter
+     */
     public void frighten(){
         this.frightenedFrames = 0;
         this.oldMode = this.mode;
@@ -139,12 +175,18 @@ public abstract class Ghost extends Entity{
         this.sprite = frightenedSprite;
     }
 
+    /**
+     * Sets the mode back to the old mode, resets the frightened counter
+     */
     public void unfrighten(){
         this.mode = this.oldMode;
         this.sprite = normalSprite;
         this.frightenedFrames = 0;
     }
 
+    /**
+     * Sets the mode to the soda mode and begins the soda counter
+     */
     public void soda(){
         this.frightenedFrames = 0;
         if (this.mode == GhostMode.CHASE || this.mode == GhostMode.SCATTER){
@@ -154,6 +196,9 @@ public abstract class Ghost extends Entity{
             this.sprite = sodaSprite;
     }
 
+    /**
+     * Sets the mode back to the old mode, resets the soda counter
+     */
     public void unsoda(){
         if (this.mode == GhostMode.CHASE || this.mode == GhostMode.SCATTER){
             this.mode = this.oldMode;
@@ -162,11 +207,18 @@ public abstract class Ghost extends Entity{
         this.frightenedFrames = 0;
     }
 
+    /**
+     * Kills the entity, setting the sprite to nothing 
+     */
     public void kill(){
         this.alive = false;
         this.sprite = this.deadSprite;
     }
 
+    /**
+     * Returns whether the current entity is currently dead 
+     * @return Boolean value of the dead status of the entity 
+     */
     public boolean isDead(){
         return !this.alive;
     }
