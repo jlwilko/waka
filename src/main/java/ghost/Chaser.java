@@ -19,7 +19,9 @@ public class Chaser extends Ghost{
      * @param sprites a map containing the other sprites this ghost could have
      */
     public Chaser(int x, int y, PImage sprite, long speed, Game game, List<Long> modeLengths, long frightenedLength, Map<String, PImage> sprites){
+        // create a normal ghost 
         super(x,y,sprite,speed,game,modeLengths,frightenedLength, sprites);
+        // add the specific Chaser soda sprite to the ghost
         this.sodaSprite = sprites.get("csoda");
     }
     
@@ -29,10 +31,13 @@ public class Chaser extends Ghost{
      * The coordinates will always be on-screen
      */
     public void setTarget(){
+
         if (this.mode == GhostMode.CHASE || this.mode == GhostMode.SODA){
+            // this ghost simply targets the player 
             this.targetX = this.game.getPlayerX();
             this.targetY = this.game.getPlayerY();
         } else {
+            // IF mode is SCATTER or FRIGHTENED, target the top left corner
             this.targetX = Corner.TOPLEFT.x;
             this.targetY = Corner.TOPLEFT.y;
         }

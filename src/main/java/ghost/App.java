@@ -50,6 +50,7 @@ public class App extends PApplet {
      * Manages both the logical progression and drawing of the game 
      */
     public void draw() { 
+        // Tick the game, then write the background, then draw the next frame 
         this.game.tick(this);
         background(0, 0, 0);
         this.game.draw(this);
@@ -70,6 +71,7 @@ public class App extends PApplet {
      * This is used for the debug mode toggling on spacebar key
      */
     public void keyReleased(){
+        // if the key released is the spacebar 
         if (key == ' '){
             this.game.toggleDebug();
         }

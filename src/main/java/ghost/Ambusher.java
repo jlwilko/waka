@@ -19,7 +19,9 @@ public class Ambusher extends Ghost{
      * @param sprites a map containing the other sprites this ghost could have
      */
     public Ambusher(int x, int y, PImage sprite, long speed, Game game, List<Long> modeLengths, long frightenedLength, Map<String, PImage> sprites){
+        // create a normal ghost
         super(x,y,sprite,speed,game,modeLengths,frightenedLength, sprites);
+        // add the ambusher soda sprite to this ghost 
         this.sodaSprite = sprites.get("asoda");
     }
     
@@ -29,13 +31,19 @@ public class Ambusher extends Ghost{
      * The coordinates will always be on-screen
      */
     public void setTarget(){
+
         if (this.mode == GhostMode.CHASE || this.mode == GhostMode.SODA){
+            // This ghost targets 4 spaces ahead of the current waka
             this.targetX = this.game.getPlayerX()+4*this.game.getPlayerVelX();
             this.targetY = this.game.getPlayerY()+4*this.game.getPlayerVelY();
+            
+            // Make sure the target location is within the bounds of the map
             LimitRange.limit(this.targetX, 0, 27);
             LimitRange.limit(this.targetY, 0, 35);
             
         } else {
+            // If we are in SCATTER or FRIGHTENED mode, draw the target of this ghost 
+            // as the top right corner 
             this.targetX = Corner.TOPRIGHT.x;
             this.targetY = Corner.TOPRIGHT.y;
         }

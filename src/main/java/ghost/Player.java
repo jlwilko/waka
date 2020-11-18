@@ -7,7 +7,13 @@ import processing.core.PImage;
 
 public class Player extends Entity{
 
+    /**
+     * The number of frames since the sprite has changed - for animating the eating effect
+     */
     private int framesSinceChange;
+    /**
+     * The map of all sprites the player can have
+     */
     private Map<Direction,PImage> sprites; 
 
     /**
@@ -19,8 +25,11 @@ public class Player extends Entity{
      * @param game A reference to the game that the player is a part of
      */
     public Player(int x, int y, Map<Direction,PImage> sprites, long speed, Game game){
+        // create an entity
         super(x, y, sprites.get(Direction.LEFT), speed, game);
+        // update the spritemap
         this.sprites = sprites; 
+        // initialise the frames before changing as 0 
         this.framesSinceChange = 0;
     }
 
@@ -46,14 +55,12 @@ public class Player extends Entity{
      * @param app The instance of the app that the player is in
      */
     public boolean tick(App app){
+        // Normal entity tick method, need to store whether we moved or not for later
         boolean res = super.tick(app);
-        // if (this.game.detectCollision()){
-        //     this.game.loseLife();
-        //     this.game.restart(false);
-        // }
+        // increment the frame counter for animating the eating 
         this.framesSinceChange++;
-        // System.out.printf("frames = %d\n", this.framesSinceChange);
         
+        // If we need to change sprite, change sprite 
         if (this.framesSinceChange >= 8){
             this.changeSprite();
             this.framesSinceChange = 0;
@@ -67,12 +74,16 @@ public class Player extends Entity{
      */
     private void changeSprite(){
         if (this.sprite == this.sprites.get(Direction.NONE)){
+            // IF we are currently not moving and we are showing the non moving sprite, 
+            // continue the eating animation in the direction we were last moving 
             if (this.movement == Direction.NONE){
                 this.sprite = this.sprites.get(this.lastMovement);
             } else {
+                // If we are currently showing the closed movement, but actually moving, then show the appropriate sprite
                 this.sprite = this.sprites.get(this.movement);
             }
         } else {
+            // If we were not showing the closed sprite, then change to the closed sprite
             this.sprite = this.sprites.get(Direction.NONE);
         }
     }
@@ -83,6 +94,7 @@ public class Player extends Entity{
      */
     public void restart(){
         super.restart();
+        // Reset the direction of the player, to face left off the start 
         this.sprite = this.sprites.get(Direction.LEFT);
     }
 
